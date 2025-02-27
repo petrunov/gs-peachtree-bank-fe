@@ -33,7 +33,12 @@
           </colgroup>
 
           <tbody class="bg-white divide-y divide-gray-200">
-            <tr v-for="transaction in transactions" :key="transaction.id" class="hover:bg-gray-50">
+            <tr
+              v-for="transaction in transactions"
+              :key="transaction.id"
+              class="hover:bg-gray-50 cursor-pointer"
+              @click="navigateToDetail(transaction.id)"
+            >
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                 {{ formatDate(transaction.date) }}
               </td>
@@ -56,23 +61,27 @@
         <p class="text-gray-500">No transactions found.</p>
       </div>
 
-      <!-- Detail Page Link -->
-      <div class="bg-white p-4 border-t border-gray-200">
-        <router-link
-          to="/detail"
-          class="text-white bg-[#0C8397] hover:bg-[#0A7082] focus:ring-4 focus:ring-[#0C8397]/50 font-medium rounded-lg text-sm px-5 py-2.5 focus:outline-none"
-        >
-          Go to Detail Page
-        </router-link>
-      </div>
+      <!-- No Detail Page Link - Rows are clickable instead -->
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
 import { getTransactions } from '../services/modules/transactions';
 import type { Transaction } from '../services/api/types';
+
+// Get router instance
+const router = useRouter();
+
+// Navigate to detail page with transaction ID as query parameter
+const navigateToDetail = (transactionId: number) => {
+  router.push({
+    path: '/detail',
+    query: { transaction_id: transactionId.toString() },
+  });
+};
 
 // State
 const transactions = ref<Transaction[]>([]);

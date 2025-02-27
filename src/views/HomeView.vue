@@ -41,19 +41,25 @@
             <span class="mr-2 text-gray-600">Sort:</span>
             <div class="inline-flex rounded-md shadow-sm">
               <button
-                class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-l-md hover:bg-gray-50"
+                @click="sortTransactions('date')"
+                class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-l-md hover:bg-gray-50 cursor-pointer"
+                :class="{ 'bg-gray-100': sortColumn === 'date' }"
               >
-                date
+                date{{ getSortIndicator('date') }}
               </button>
               <button
-                class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border-t border-b border-gray-300 hover:bg-gray-50"
+                @click="sortTransactions('beneficiary')"
+                class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border-t border-b border-gray-300 hover:bg-gray-50 cursor-pointer"
+                :class="{ 'bg-gray-100': sortColumn === 'beneficiary' }"
               >
-                beneficiary
+                beneficiary{{ getSortIndicator('beneficiary') }}
               </button>
               <button
-                class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-r-md hover:bg-gray-50"
+                @click="sortTransactions('amount')"
+                class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-r-md hover:bg-gray-50 cursor-pointer"
+                :class="{ 'bg-gray-100': sortColumn === 'amount' }"
               >
-                amount
+                amount{{ getSortIndicator('amount') }}
               </button>
             </div>
           </div>
@@ -132,6 +138,54 @@ const error = ref<string | null>(null);
 const searchQuery = ref('');
 const isSearching = ref(false);
 let searchTimeout: number | null = null;
+
+// Sorting state
+const sortColumn = ref<'date' | 'beneficiary' | 'amount' | null>(null);
+const sortDirection = ref<'asc' | 'desc'>('asc');
+
+// Sort transactions
+const sortTransactions = (column: 'date' | 'beneficiary' | 'amount') => {
+  // If clicking the same column, toggle direction
+  if (sortColumn.value === column) {
+    sortDirection.value = sortDirection.value === 'asc' ? 'desc' : 'asc';
+  } else {
+    // If clicking a new column, set it as the sort column and reset direction to asc
+    sortColumn.value = column;
+    sortDirection.value = 'asc';
+  }
+
+  // Sort the transactions array
+  transactions.value = [...transactions.value].sort((a, b) => {
+    let valueA, valueB;
+
+    if (column === 'date') {
+      valueA = new Date(a.date).getTime();
+      valueB = new Date(b.date).getTime();
+    } else if (column === 'beneficiary') {
+      valueA = a.beneficiary.toLowerCase();
+      valueB = b.beneficiary.toLowerCase();
+    } else {
+      // amount
+      valueA = parseFloat(a.amount);
+      valueB = parseFloat(b.amount);
+    }
+
+    // Sort based on direction
+    if (sortDirection.value === 'asc') {
+      return valueA > valueB ? 1 : -1;
+    } else {
+      return valueA < valueB ? 1 : -1;
+    }
+  });
+};
+
+// Get sort indicator for a column
+const getSortIndicator = (column: 'date' | 'beneficiary' | 'amount') => {
+  if (sortColumn.value !== column) {
+    return '';
+  }
+  return sortDirection.value === 'asc' ? ' ▲' : ' ▼';
+};
 
 // Debounced search function
 const debouncedSearch = (query: string) => {

@@ -66,7 +66,7 @@
         </div>
 
         <!-- Transactions Table -->
-        <div v-if="transactions.length" class="bg-white flex-grow overflow-auto">
+        <div v-if="transactions.length" class="bg-white flex-grow overflow-auto h-[calc(50vh)]">
           <table class="w-full divide-y divide-gray-200 table-fixed">
             <colgroup>
               <col class="w-48" />

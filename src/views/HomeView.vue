@@ -20,52 +20,84 @@
         </div>
       </div>
 
-      <!-- Transactions Table -->
-      <div v-else-if="transactions.length" class="bg-white flex-grow overflow-auto">
-        <table class="w-full divide-y divide-gray-200 table-fixed">
-          <colgroup>
-            <col class="w-48" />
-            <!-- Date column width -->
-            <col class="w-auto" />
-            <!-- Details column - takes remaining space -->
-            <col class="w-36" />
-            <!-- Amount column width -->
-          </colgroup>
-
-          <tbody class="bg-white divide-y divide-gray-200">
-            <tr
-              v-for="transaction in transactions"
-              :key="transaction.id"
-              class="hover:bg-gray-50 cursor-pointer"
-              @click="navigateToDetail(transaction.id)"
-            >
-              <td
-                class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 border-l-[5px]"
-                :class="getTransactionBorderColor(transaction)"
+      <!-- Content when data is loaded -->
+      <div v-if="!loading && !error">
+        <!-- Search and Sort Controls -->
+        <div class="flex items-center mb-4">
+          <div class="relative flex-grow mr-6">
+            <input
+              type="text"
+              placeholder="Search by typing..."
+              class="w-full py-2 focus:outline-none border-b-2 border-gray-200"
+            />
+          </div>
+          <div class="flex items-center">
+            <span class="mr-2 text-gray-600">Sort:</span>
+            <div class="inline-flex rounded-md shadow-sm">
+              <button
+                class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-l-md hover:bg-gray-50"
               >
-                {{ formatDate(transaction.date) }}
-              </td>
-              <td class="px-6 py-4 text-sm text-gray-900 break-words">
-                <div class="font-bold mb-1">{{ transaction.beneficiary }}</div>
-                {{ transaction.description }}
-              </td>
-              <td
-                class="px-6 py-4 whitespace-nowrap text-sm text-right font-bold"
-                :class="parseFloat(transaction.amount) < 0 ? 'text-red-600' : 'text-green-600'"
+                date
+              </button>
+              <button
+                class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border-t border-b border-gray-300 hover:bg-gray-50"
               >
-                {{ formatAmount(transaction.amount) }}
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+                beneficiary
+              </button>
+              <button
+                class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-r-md hover:bg-gray-50"
+              >
+                amount
+              </button>
+            </div>
+          </div>
+        </div>
 
-      <!-- Empty State -->
-      <div v-else class="bg-white flex-grow p-8 text-center">
-        <p class="text-gray-500">No transactions found.</p>
-      </div>
+        <!-- Transactions Table -->
+        <div v-if="transactions.length" class="bg-white flex-grow overflow-auto">
+          <table class="w-full divide-y divide-gray-200 table-fixed">
+            <colgroup>
+              <col class="w-48" />
+              <!-- Date column width -->
+              <col class="w-auto" />
+              <!-- Details column - takes remaining space -->
+              <col class="w-36" />
+              <!-- Amount column width -->
+            </colgroup>
 
-      <!-- No Detail Page Link - Rows are clickable instead -->
+            <tbody class="bg-white divide-y divide-gray-200">
+              <tr
+                v-for="transaction in transactions"
+                :key="transaction.id"
+                class="hover:bg-gray-50 cursor-pointer"
+                @click="navigateToDetail(transaction.id)"
+              >
+                <td
+                  class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 border-l-[5px]"
+                  :class="getTransactionBorderColor(transaction)"
+                >
+                  {{ formatDate(transaction.date) }}
+                </td>
+                <td class="px-6 py-4 text-sm text-gray-900 break-words">
+                  <div class="font-bold mb-1">{{ transaction.beneficiary }}</div>
+                  {{ transaction.description }}
+                </td>
+                <td
+                  class="px-6 py-4 whitespace-nowrap text-sm text-right font-bold"
+                  :class="parseFloat(transaction.amount) < 0 ? 'text-red-600' : 'text-green-600'"
+                >
+                  {{ formatAmount(transaction.amount) }}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Empty State -->
+        <div v-else class="bg-white flex-grow p-8 text-center">
+          <p class="text-gray-500">No transactions found.</p>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -113,15 +145,18 @@ const formatAmount = (amount: string): string => {
 
 // Determine transaction border color based on type
 const getTransactionBorderColor = (transaction: Transaction): string => {
+  // Sent transactions
   if (transaction.state === 'sent') {
     return 'border-red-500';
   }
 
+  // Paid transactions
   if (transaction.state === 'paid') {
     return 'border-green-500';
   }
 
-  return 'border-yellow-500';
+  // Received transactions
+  return 'border-yellow-500'; // For 'received' state
 };
 
 // Fetch transactions on component mount

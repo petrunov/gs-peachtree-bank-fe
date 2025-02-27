@@ -120,6 +120,11 @@ import { useRouter } from 'vue-router';
 import { getTransactions, searchAccountsAndTransactions } from '../services/modules/transactions';
 import type { Transaction } from '../services/api/types';
 
+// Props
+const props = defineProps<{
+  refreshTrigger?: number;
+}>();
+
 // Get router instance
 const router = useRouter();
 
@@ -236,6 +241,9 @@ const loadAllTransactions = async () => {
   }
 };
 
+// Expose the function to parent components
+defineExpose({ loadAllTransactions });
+
 // Format date to MMM DD format (e.g., Oct 19)
 const formatDate = (dateString: string): string => {
   const date = new Date(dateString);
@@ -270,6 +278,16 @@ const getTransactionBorderColor = (transaction: Transaction): string => {
   // Received transactions
   return 'border-yellow-500'; // For 'received' state
 };
+
+// Watch for changes to the refresh trigger
+watch(
+  () => props.refreshTrigger,
+  () => {
+    if (props.refreshTrigger && props.refreshTrigger > 0) {
+      loadAllTransactions();
+    }
+  },
+);
 
 // Fetch transactions on component mount
 onMounted(async () => {

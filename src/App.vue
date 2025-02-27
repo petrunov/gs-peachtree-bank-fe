@@ -4,7 +4,11 @@ import AppHeader from './components/layout/AppHeader.vue';
 import MainLayout from './components/layout/MainLayout.vue';
 import TwoColumnLayout from './components/layout/TwoColumnLayout.vue';
 import { getAccounts } from './services/modules/accounts';
+import { createTransaction } from './services/modules/transactions';
 import type { Account } from './services/api/types';
+
+// Refresh trigger for transactions list
+const refreshTrigger = ref(0);
 
 // Accounts state
 const accounts = ref<Account[]>([]);
@@ -16,6 +20,8 @@ const newTransaction = ref({
   fromAccount: '',
   toAccount: '',
   amount: '',
+  beneficiary: '',
+  description: '',
 });
 const amountError = ref<string | null>(null);
 const isSubmitting = ref(false);
@@ -86,7 +92,9 @@ const submitNewTransaction = async () => {
   if (
     !newTransaction.value.fromAccount ||
     !newTransaction.value.toAccount ||
-    !newTransaction.value.amount
+    !newTransaction.value.amount ||
+    !newTransaction.value.beneficiary ||
+    !newTransaction.value.description
   ) {
     submitError.value = 'Please fill in all fields';
     return;
@@ -100,8 +108,31 @@ const submitNewTransaction = async () => {
   isSubmitting.value = true;
 
   try {
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    // Format amount to ensure it has 2 decimal places
+    let formattedAmount = newTransaction.value.amount;
+    if (!formattedAmount.includes('.')) {
+      formattedAmount += '.00';
+    } else if (formattedAmount.split('.')[1].length === 1) {
+      formattedAmount += '0';
+    }
+
+    // Find the selected "to" account to get the beneficiary name
+    const toAccount = accounts.value.find(
+      account => account.id.toString() === newTransaction.value.toAccount,
+    );
+
+    if (!toAccount) {
+      throw new Error('Selected account not found');
+    }
+
+    // Call API to create transaction
+    await createTransaction({
+      amount: formattedAmount,
+      beneficiary: newTransaction.value.beneficiary,
+      description: newTransaction.value.description,
+      from_account_id: parseInt(newTransaction.value.fromAccount),
+      to_account_id: parseInt(newTransaction.value.toAccount),
+    });
 
     // Show success message
     submitSuccess.value = true;
@@ -111,13 +142,19 @@ const submitNewTransaction = async () => {
       fromAccount: '',
       toAccount: '',
       amount: '',
+      beneficiary: '',
+      description: '',
     };
+
+    // Increment the refresh trigger to notify components to refresh
+    refreshTrigger.value++;
 
     // Hide success message after 3 seconds
     setTimeout(() => {
       submitSuccess.value = false;
     }, 3000);
   } catch (error) {
+    console.error('Failed to add transaction:', error);
     submitError.value = 'Failed to add transaction. Please try again.';
   } finally {
     isSubmitting.value = false;
@@ -226,6 +263,36 @@ const submitNewTransaction = async () => {
                 <p v-if="amountError" class="mt-1 text-sm text-red-600">{{ amountError }}</p>
               </div>
 
+              <!-- Beneficiary -->
+              <div>
+                <label for="beneficiary" class="block text-sm font-medium text-gray-700 mb-1">
+                  BENEFICIARY
+                </label>
+                <input
+                  type="text"
+                  id="beneficiary"
+                  v-model="newTransaction.beneficiary"
+                  class="block w-full rounded-md border-gray-300 shadow-sm focus:border-[#0C8397] focus:ring-[#0C8397] sm:text-sm"
+                  placeholder="Enter beneficiary name"
+                  required
+                />
+              </div>
+
+              <!-- Description -->
+              <div>
+                <label for="description" class="block text-sm font-medium text-gray-700 mb-1">
+                  DESCRIPTION
+                </label>
+                <textarea
+                  id="description"
+                  v-model="newTransaction.description"
+                  rows="2"
+                  class="block w-full rounded-md border-gray-300 shadow-sm focus:border-[#0C8397] focus:ring-[#0C8397] sm:text-sm"
+                  placeholder="Enter transaction description"
+                  required
+                ></textarea>
+              </div>
+
               <!-- Submit Button -->
               <div class="pt-2">
                 <button
@@ -253,7 +320,7 @@ const submitNewTransaction = async () => {
 
         <template #right-column>
           <div class="h-full">
-            <router-view />
+            <router-view :refresh-trigger="refreshTrigger" />
           </div>
         </template>
       </TwoColumnLayout>

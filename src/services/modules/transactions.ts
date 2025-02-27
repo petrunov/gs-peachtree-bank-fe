@@ -55,3 +55,18 @@ export const searchAccountsAndTransactions = async (
 export const updateTransactionState = async (id: number, state: 'sent' | 'received' | 'paid') => {
   return apiClient.patch<Transaction>(`/api/transactions/${id}`, { state });
 };
+
+/**
+ * Creates a new transaction
+ * @param data Transaction data
+ * @returns Promise with created transaction data
+ */
+export const createTransaction = async (data: {
+  amount: string;
+  beneficiary: string;
+  description: string;
+  from_account_id: number;
+  to_account_id: number;
+}) => {
+  return apiClient.post<Transaction>('/api/transactions', data);
+};

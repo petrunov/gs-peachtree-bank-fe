@@ -1,4 +1,3 @@
-// Simple ESLint configuration for ESLint 9.x
 export default [
   {
     ignores: ['dist/**', 'node_modules/**'],

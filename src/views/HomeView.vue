@@ -39,14 +39,18 @@
               class="hover:bg-gray-50 cursor-pointer"
               @click="navigateToDetail(transaction.id)"
             >
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+              <td
+                class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 border-l-[5px]"
+                :class="getTransactionBorderColor(transaction)"
+              >
                 {{ formatDate(transaction.date) }}
               </td>
               <td class="px-6 py-4 text-sm text-gray-900 break-words">
+                <div class="font-bold mb-1">{{ transaction.beneficiary }}</div>
                 {{ transaction.description }}
               </td>
               <td
-                class="px-6 py-4 whitespace-nowrap text-sm text-right"
+                class="px-6 py-4 whitespace-nowrap text-sm text-right font-bold"
                 :class="parseFloat(transaction.amount) < 0 ? 'text-red-600' : 'text-green-600'"
               >
                 {{ formatAmount(transaction.amount) }}
@@ -88,15 +92,12 @@ const transactions = ref<Transaction[]>([]);
 const loading = ref(true);
 const error = ref<string | null>(null);
 
-// Format date to a more readable format
+// Format date to MMM DD format (e.g., Oct 19)
 const formatDate = (dateString: string): string => {
   const date = new Date(dateString);
   return new Intl.DateTimeFormat('en-US', {
-    year: 'numeric',
     month: 'short',
     day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
   }).format(date);
 };
 
@@ -108,6 +109,19 @@ const formatAmount = (amount: string): string => {
     currency: 'EUR',
     signDisplay: 'never',
   }).format(Math.abs(value));
+};
+
+// Determine transaction border color based on type
+const getTransactionBorderColor = (transaction: Transaction): string => {
+  if (transaction.state === 'sent') {
+    return 'border-red-500';
+  }
+
+  if (transaction.state === 'paid') {
+    return 'border-green-500';
+  }
+
+  return 'border-yellow-500';
 };
 
 // Fetch transactions on component mount

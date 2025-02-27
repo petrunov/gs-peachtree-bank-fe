@@ -16,7 +16,7 @@ export interface Transaction {
   amount: string;
   beneficiary: string;
   description: string;
-  state: 'pending' | 'completed' | 'failed' | 'cancelled';
+  state: 'sent' | 'received' | 'paid';
   from_account_id: number;
   to_account_id: number;
 }

@@ -11,7 +11,7 @@ import TwoColumnLayout from './components/layout/TwoColumnLayout.vue';
     <MainLayout backgroundImage="/images/background.jpg">
       <TwoColumnLayout>
         <template #left-column>
-          <div class="h-full"></div>
+          <div></div>
         </template>
 
         <template #right-column>

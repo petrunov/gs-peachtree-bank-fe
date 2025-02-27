@@ -1,6 +1,6 @@
 <template>
   <main
-    class="w-full h-[calc(100vh-4rem)] bg-cover bg-center p-8"
+    class="w-full h-[calc(100vh-4rem)] bg-cover bg-center px-25 py-15"
     :style="{ backgroundImage: `url(${backgroundImage})` }"
   >
     <slot>

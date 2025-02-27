@@ -1,7 +1,7 @@
 <template>
-  <header class="w-full bg-white py-4 shadow-md">
-    <div class="w-full px-4">
-      <h1 class="text-2xl font-bold text-blue-800">PeachtreeBank</h1>
+  <header class="w-full bg-white py-10 shadow-md">
+    <div class="container pl-[6.25rem] flex items-center">
+      <img src="/images/logo.png" alt="Bank Logo" class="h-10" />
     </div>
   </header>
 </template>

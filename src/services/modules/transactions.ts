@@ -1,5 +1,5 @@
 import { apiClient } from '../api';
-import type { Transaction } from '../api/types';
+import type { Transaction, SearchResponse } from '../api/types';
 
 /**
  * Fetches transactions with optional filtering and pagination
@@ -23,4 +23,25 @@ export const getTransactions = async (params?: {
  */
 export const getTransactionById = async (id: number) => {
   return apiClient.get<Transaction>(`/api/transactions/${id}`);
+};
+
+/**
+ * Searches for accounts and transactions
+ * @param query Search query
+ * @param limit Maximum number of results to return
+ * @param offset Number of results to skip
+ * @returns Promise with search results
+ */
+export const searchAccountsAndTransactions = async (
+  query: string,
+  limit: number = 100,
+  offset: number = 0,
+) => {
+  return apiClient.get<SearchResponse>('/api/search', {
+    params: {
+      q: query,
+      limit,
+      offset,
+    },
+  });
 };

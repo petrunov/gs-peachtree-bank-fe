@@ -19,4 +19,17 @@ export interface Transaction {
   state: 'sent' | 'received' | 'paid';
   from_account_id: number;
   to_account_id: number;
+  type?: 'transaction';
+}
+
+export interface Account {
+  id: number;
+  account_name: string;
+  account_number: string;
+  type: 'account';
+}
+
+export interface SearchResponse {
+  accounts: Account[];
+  transactions: Transaction[];
 }

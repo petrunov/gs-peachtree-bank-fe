@@ -26,10 +26,16 @@
         <div class="flex items-center mb-4">
           <div class="relative flex-grow mr-6">
             <input
+              v-model="searchQuery"
               type="text"
               placeholder="Search by typing..."
               class="w-full py-2 focus:outline-none border-b-2 border-gray-200"
             />
+            <div v-if="isSearching" class="absolute right-0 top-2">
+              <div
+                class="inline-block animate-spin rounded-full h-4 w-4 border-b-2 border-[#0C8397]"
+              ></div>
+            </div>
           </div>
           <div class="flex items-center">
             <span class="mr-2 text-gray-600">Sort:</span>
@@ -103,9 +109,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, watch } from 'vue';
 import { useRouter } from 'vue-router';
-import { getTransactions } from '../services/modules/transactions';
+import { getTransactions, searchAccountsAndTransactions } from '../services/modules/transactions';
 import type { Transaction } from '../services/api/types';
 
 // Get router instance
@@ -123,6 +129,58 @@ const navigateToDetail = (transactionId: number) => {
 const transactions = ref<Transaction[]>([]);
 const loading = ref(true);
 const error = ref<string | null>(null);
+const searchQuery = ref('');
+const isSearching = ref(false);
+let searchTimeout: number | null = null;
+
+// Debounced search function
+const debouncedSearch = (query: string) => {
+  // Clear any existing timeout
+  if (searchTimeout) {
+    clearTimeout(searchTimeout);
+  }
+
+  // If query is empty, load all transactions
+  if (!query.trim()) {
+    loadAllTransactions();
+    return;
+  }
+
+  // Set a new timeout
+  isSearching.value = true;
+  searchTimeout = window.setTimeout(async () => {
+    try {
+      const response = await searchAccountsAndTransactions(query);
+      transactions.value = response.data.transactions;
+
+      if (transactions.value.length === 0 && response.data.accounts.length === 0) {
+        // No results found
+        console.log('No results found for query:', query);
+      }
+    } catch (err) {
+      console.error('Search failed:', err);
+      error.value = 'Failed to search. Please try again.';
+    } finally {
+      isSearching.value = false;
+    }
+  }, 300); // 300ms debounce time
+};
+
+// Watch for changes to search query
+watch(searchQuery, newQuery => {
+  debouncedSearch(newQuery);
+});
+
+// Load all transactions
+const loadAllTransactions = async () => {
+  try {
+    const response = await getTransactions();
+    transactions.value = response.data;
+  } catch (err) {
+    console.error('Failed to fetch transactions:', err);
+    error.value = 'Failed to load transactions. Please try again later.';
+  }
+};
 
 // Format date to MMM DD format (e.g., Oct 19)
 const formatDate = (dateString: string): string => {

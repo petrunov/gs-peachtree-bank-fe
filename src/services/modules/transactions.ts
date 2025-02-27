@@ -45,3 +45,13 @@ export const searchAccountsAndTransactions = async (
     },
   });
 };
+
+/**
+ * Updates a transaction's state
+ * @param id Transaction ID
+ * @param state New transaction state
+ * @returns Promise with updated transaction data
+ */
+export const updateTransactionState = async (id: number, state: 'sent' | 'received' | 'paid') => {
+  return apiClient.patch<Transaction>(`/api/transactions/${id}`, { state });
+};

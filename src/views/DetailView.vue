@@ -37,37 +37,59 @@
         </div>
 
         <div v-else-if="transaction" class="overflow-x-auto relative">
-          <!-- Transaction details -->
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-            <div>
-              <h2 class="text-lg font-semibold mb-2">Transaction Information</h2>
-              <div class="space-y-2">
-                <p><span class="font-medium">ID:</span> {{ transaction.id }}</p>
-                <p><span class="font-medium">Date:</span> {{ formatDate(transaction.date) }}</p>
-                <p>
-                  <span class="font-medium">Amount:</span>
-                  <span
-                    :class="parseFloat(transaction.amount) < 0 ? 'text-red-600' : 'text-green-600'"
-                    >{{ formatAmount(transaction.amount) }}</span
-                  >
-                </p>
-                <p>
-                  <span class="font-medium">Status:</span>
-                  <span class="capitalize">{{ transaction.state }}</span>
-                </p>
+          <!-- Transaction details table -->
+          <table class="w-1/2 mb-6 border-collapse mx-auto">
+            <tbody>
+              <tr class="border-b">
+                <td class="py-3 font-medium">Amount</td>
+                <td
+                  class="py-3"
+                  :class="parseFloat(transaction.amount) < 0 ? 'text-red-600' : 'text-green-600'"
+                >
+                  {{ formatAmount(transaction.amount) }}
+                </td>
+              </tr>
+              <tr class="border-b">
+                <td class="py-3 font-medium">Date</td>
+                <td class="py-3">{{ formatDateSimple(transaction.date) }}</td>
+              </tr>
+              <tr class="border-b">
+                <td class="py-3 font-medium">To contractor</td>
+                <td class="py-3">{{ transaction.beneficiary }}</td>
+              </tr>
+              <tr class="border-b">
+                <td class="py-3 font-medium">State</td>
+                <td class="py-3 capitalize">{{ transaction.state }}</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <!-- State change dropdown -->
+          <div class="mt-8 mx-auto w-1/2">
+            <label for="state-select" class="block text-sm font-medium text-gray-700 mb-2">
+              Change transaction state
+            </label>
+            <div class="relative w-64">
+              <select
+                id="state-select"
+                v-model="selectedState"
+                class="block w-full rounded-md border-gray-300 shadow-sm focus:border-[#0C8397] focus:ring-[#0C8397] sm:text-sm"
+                :disabled="isUpdating"
+              >
+                <option value="sent">Sent</option>
+                <option value="received">Received</option>
+                <option value="paid">Paid</option>
+              </select>
+              <div v-if="isUpdating" class="absolute right-3 top-2">
+                <div
+                  class="inline-block animate-spin rounded-full h-4 w-4 border-b-2 border-[#0C8397]"
+                ></div>
               </div>
             </div>
-            <div>
-              <h2 class="text-lg font-semibold mb-2">Details</h2>
-              <div class="space-y-2">
-                <p><span class="font-medium">Beneficiary:</span> {{ transaction.beneficiary }}</p>
-                <p><span class="font-medium">Description:</span> {{ transaction.description }}</p>
-                <p>
-                  <span class="font-medium">From Account:</span> {{ transaction.from_account_id }}
-                </p>
-                <p><span class="font-medium">To Account:</span> {{ transaction.to_account_id }}</p>
-              </div>
-            </div>
+            <p v-if="updateError" class="mt-2 text-sm text-red-600">{{ updateError }}</p>
+            <p v-if="updateSuccess" class="mt-2 text-sm text-green-600">
+              Transaction state updated successfully!
+            </p>
           </div>
         </div>
 
@@ -78,9 +100,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted, computed, watch } from 'vue';
 import { useRoute } from 'vue-router';
-import { getTransactionById } from '../services/modules/transactions';
+import { getTransactionById, updateTransactionState } from '../services/modules/transactions';
 import type { Transaction } from '../services/api/types';
 
 // Get route to access query parameters
@@ -90,6 +112,10 @@ const route = useRoute();
 const loading = ref(true);
 const error = ref<string | null>(null);
 const transaction = ref<Transaction | null>(null);
+const selectedState = ref<'sent' | 'received' | 'paid'>('sent');
+const isUpdating = ref(false);
+const updateError = ref<string | null>(null);
+const updateSuccess = ref(false);
 
 // Computed property for transaction ID
 const transactionId = computed(() => {
@@ -128,18 +154,6 @@ const fetchTransactionData = async () => {
   }
 };
 
-// Format date to a more readable format
-const formatDate = (dateString: string): string => {
-  const date = new Date(dateString);
-  return new Intl.DateTimeFormat('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  }).format(date);
-};
-
 // Format amount with currency symbol
 const formatAmount = (amount: string): string => {
   const value = parseFloat(amount);
@@ -149,6 +163,63 @@ const formatAmount = (amount: string): string => {
     signDisplay: 'never',
   }).format(Math.abs(value));
 };
+
+// Format date in DD MMM YYYY format
+const formatDateSimple = (dateString: string): string => {
+  const date = new Date(dateString);
+  return new Intl.DateTimeFormat('de-DE', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+  }).format(date);
+};
+
+// Update transaction state
+const updateState = async () => {
+  if (!transaction.value || !transactionId.value) return;
+
+  // Reset state
+  updateError.value = null;
+  updateSuccess.value = false;
+  isUpdating.value = true;
+
+  try {
+    const response = await updateTransactionState(transactionId.value, selectedState.value);
+    transaction.value = response.data;
+    updateSuccess.value = true;
+
+    // Hide success message after 3 seconds
+    setTimeout(() => {
+      updateSuccess.value = false;
+    }, 3000);
+  } catch (err) {
+    console.error('Failed to update transaction state:', err);
+    updateError.value = 'Failed to update transaction state. Please try again.';
+  } finally {
+    isUpdating.value = false;
+  }
+};
+
+// Set initial selected state when transaction is loaded
+watch(
+  () => transaction.value,
+  newTransaction => {
+    if (newTransaction) {
+      selectedState.value = newTransaction.state as 'sent' | 'received' | 'paid';
+    }
+  },
+);
+
+// Watch for changes to selectedState and update transaction
+watch(
+  () => selectedState.value,
+  (newState, oldState) => {
+    // Only update if the state has changed and it's not the initial setting
+    if (newState !== oldState && transaction.value && newState !== transaction.value.state) {
+      updateState();
+    }
+  },
+);
 
 // Fetch data on component mount
 onMounted(() => {

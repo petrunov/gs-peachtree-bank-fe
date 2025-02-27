@@ -3,12 +3,10 @@
 </template>
 
 <script setup lang="ts">
-// Define props
 interface Props {
   title?: string;
 }
 
-// Set default props
 const props = withDefaults(defineProps<Props>(), {
   title: 'Recent Transactions',
 });

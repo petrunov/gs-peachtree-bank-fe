@@ -8,7 +8,6 @@
 </template>
 
 <script setup lang="ts">
-// Define props
 interface Props {
   message: string;
 }

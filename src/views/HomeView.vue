@@ -39,7 +39,6 @@ import { useRouter } from 'vue-router';
 import { getTransactions, searchAccountsAndTransactions } from '../services/modules/transactions';
 import type { Transaction } from '../services/api/types';
 
-// Import components
 import TransactionHeader from '../components/transactions/TransactionHeader.vue';
 import LoadingState from '../components/transactions/LoadingState.vue';
 import ErrorState from '../components/transactions/ErrorState.vue';
@@ -47,26 +46,21 @@ import SearchAndSortControls from '../components/transactions/SearchAndSortContr
 import TransactionTable from '../components/transactions/TransactionTable.vue';
 import EmptyState from '../components/transactions/EmptyState.vue';
 
-// Props
 const props = defineProps<{
   refreshTrigger?: number;
 }>();
 
-// Get router instance
 const router = useRouter();
 
-// State
 const transactions = ref<Transaction[]>([]);
 const loading = ref(true);
 const error = ref<string | null>(null);
 const searchQuery = ref('');
 const isSearching = ref(false);
 
-// Sorting state
 const sortColumn = ref<'date' | 'beneficiary' | 'amount' | null>(null);
 const sortDirection = ref<'asc' | 'desc'>('asc');
 
-// Navigate to detail page with transaction ID as query parameter
 const navigateToDetail = (transactionId: number) => {
   router.push({
     path: '/detail',
@@ -74,7 +68,6 @@ const navigateToDetail = (transactionId: number) => {
   });
 };
 
-// Handle search from child component
 const handleSearch = (query: string) => {
   searchQuery.value = query;
 
@@ -89,7 +82,6 @@ const handleSearch = (query: string) => {
       transactions.value = response.data.transactions;
 
       if (transactions.value.length === 0 && response.data.accounts.length === 0) {
-        // No results found
         console.log('No results found for query:', query);
       }
     })
@@ -102,18 +94,14 @@ const handleSearch = (query: string) => {
     });
 };
 
-// Handle sort from child component
 const handleSort = (column: 'date' | 'beneficiary' | 'amount') => {
-  // If clicking the same column, toggle direction
   if (sortColumn.value === column) {
     sortDirection.value = sortDirection.value === 'asc' ? 'desc' : 'asc';
   } else {
-    // If clicking a new column, set it as the sort column and reset direction to asc
     sortColumn.value = column;
     sortDirection.value = 'asc';
   }
 
-  // Sort the transactions array
   transactions.value = [...transactions.value].sort((a, b) => {
     let valueA, valueB;
 
@@ -124,12 +112,10 @@ const handleSort = (column: 'date' | 'beneficiary' | 'amount') => {
       valueA = a.beneficiary.toLowerCase();
       valueB = b.beneficiary.toLowerCase();
     } else {
-      // amount
       valueA = parseFloat(a.amount);
       valueB = parseFloat(b.amount);
     }
 
-    // Sort based on direction
     if (sortDirection.value === 'asc') {
       return valueA > valueB ? 1 : -1;
     } else {
@@ -138,7 +124,6 @@ const handleSort = (column: 'date' | 'beneficiary' | 'amount') => {
   });
 };
 
-// Load all transactions
 const loadAllTransactions = async () => {
   try {
     const response = await getTransactions();
@@ -149,10 +134,8 @@ const loadAllTransactions = async () => {
   }
 };
 
-// Expose the function to parent components
 defineExpose({ loadAllTransactions });
 
-// Watch for changes to the refresh trigger
 watch(
   () => props.refreshTrigger,
   () => {
@@ -162,7 +145,6 @@ watch(
   },
 );
 
-// Fetch transactions on component mount
 onMounted(async () => {
   try {
     const response = await getTransactions();

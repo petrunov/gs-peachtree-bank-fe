@@ -5,12 +5,10 @@
 </template>
 
 <script setup lang="ts">
-// Define props
 interface Props {
   message?: string;
 }
 
-// Set default props
 const props = withDefaults(defineProps<Props>(), {
   message: 'No transactions found.',
 });

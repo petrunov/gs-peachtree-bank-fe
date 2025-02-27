@@ -152,17 +152,14 @@ import { getAccounts } from '../../services/modules/accounts';
 import { createTransaction } from '../../services/modules/transactions';
 import type { Account } from '../../services/api/types';
 
-// Define emits
 const emit = defineEmits<{
   (e: 'transactionAdded'): void;
 }>();
 
-// Accounts state
 const accounts = ref<Account[]>([]);
 const loadingAccounts = ref(true);
 const accountsError = ref<string | null>(null);
 
-// Form state
 const newTransaction = ref({
   fromAccount: '',
   toAccount: '',
@@ -175,7 +172,6 @@ const isSubmitting = ref(false);
 const submitError = ref<string | null>(null);
 const submitSuccess = ref(false);
 
-// Fetch accounts from API
 const fetchAccounts = async () => {
   loadingAccounts.value = true;
   accountsError.value = null;
@@ -197,31 +193,24 @@ const fetchAccounts = async () => {
   }
 };
 
-// Fetch accounts on component mount
 onMounted(() => {
   fetchAccounts();
 });
 
-// Format amount to ensure it has at most 2 decimal places
 const formatAmount = () => {
-  // Remove any non-numeric characters except decimal point
   let value = newTransaction.value.amount.replace(/[^\d.]/g, '');
 
-  // Ensure only one decimal point
   const parts = value.split('.');
   if (parts.length > 2) {
     value = parts[0] + '.' + parts.slice(1).join('');
   }
 
-  // Limit to 2 decimal places
   if (parts.length > 1 && parts[1].length > 2) {
     value = parts[0] + '.' + parts[1].substring(0, 2);
   }
 
-  // Update the value
   newTransaction.value.amount = value;
 
-  // Validate the amount
   if (value && !/^\d+(\.\d{1,2})?$/.test(value)) {
     amountError.value = 'Please enter a valid amount with up to two decimal places';
   } else {
@@ -229,13 +218,10 @@ const formatAmount = () => {
   }
 };
 
-// Submit the new transaction
 const submitNewTransaction = async () => {
-  // Reset state
   submitError.value = null;
   submitSuccess.value = false;
 
-  // Validate form
   if (
     !newTransaction.value.fromAccount ||
     !newTransaction.value.toAccount ||
@@ -251,11 +237,9 @@ const submitNewTransaction = async () => {
     return;
   }
 
-  // Start submission
   isSubmitting.value = true;
 
   try {
-    // Format amount to ensure it has 2 decimal places
     let formattedAmount = newTransaction.value.amount;
     if (!formattedAmount.includes('.')) {
       formattedAmount += '.00';
@@ -263,7 +247,6 @@ const submitNewTransaction = async () => {
       formattedAmount += '0';
     }
 
-    // Find the selected "to" account to get the beneficiary name
     const toAccount = accounts.value.find(
       account => account.id.toString() === newTransaction.value.toAccount,
     );
@@ -272,7 +255,6 @@ const submitNewTransaction = async () => {
       throw new Error('Selected account not found');
     }
 
-    // Call API to create transaction
     await createTransaction({
       amount: formattedAmount,
       beneficiary: newTransaction.value.beneficiary,
@@ -281,10 +263,8 @@ const submitNewTransaction = async () => {
       to_account_id: parseInt(newTransaction.value.toAccount),
     });
 
-    // Show success message
     submitSuccess.value = true;
 
-    // Reset form
     newTransaction.value = {
       fromAccount: '',
       toAccount: '',
@@ -293,10 +273,8 @@ const submitNewTransaction = async () => {
       description: '',
     };
 
-    // Emit event to notify parent component
     emit('transactionAdded');
 
-    // Hide success message after 3 seconds
     setTimeout(() => {
       submitSuccess.value = false;
     }, 3000);

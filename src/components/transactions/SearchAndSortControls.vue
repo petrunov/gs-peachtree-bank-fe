@@ -49,7 +49,6 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue';
 
-// Define props
 interface Props {
   isSearching: boolean;
   sortColumn: 'date' | 'beneficiary' | 'amount' | null;
@@ -61,41 +60,32 @@ const props = withDefaults(defineProps<Props>(), {
   initialSearchQuery: '',
 });
 
-// Define emits
 const emit = defineEmits<{
   (e: 'search', query: string): void;
   (e: 'sort', column: 'date' | 'beneficiary' | 'amount'): void;
 }>();
 
-// Local state
 const searchInputValue = ref(props.initialSearchQuery);
 let searchTimeout: number | null = null;
 
-// Watch for changes to search input
 watch(searchInputValue, newValue => {
-  // Clear any existing timeout
   if (searchTimeout) {
     clearTimeout(searchTimeout);
   }
 
-  // Set a new timeout for debounce
   searchTimeout = window.setTimeout(() => {
     emit('search', newValue);
-  }, 300); // 300ms debounce time
+  }, 300);
 });
 
-// Handle search input
 const onSearchInput = () => {
-  // This is handled by the watch, but we keep the method
-  // in case we need to add additional logic later
+  // Method kept for potential future logic
 };
 
-// Handle sort button click
 const onSortClick = (column: 'date' | 'beneficiary' | 'amount') => {
   emit('sort', column);
 };
 
-// Get sort indicator for a column
 const getSortIndicator = (column: 'date' | 'beneficiary' | 'amount') => {
   if (props.sortColumn !== column) {
     return '';

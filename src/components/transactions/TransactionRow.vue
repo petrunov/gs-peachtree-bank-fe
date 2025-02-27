@@ -20,24 +20,20 @@
 import { computed } from 'vue';
 import type { Transaction } from '../../services/api/types';
 
-// Define props
 interface Props {
   transaction: Transaction;
 }
 
 const props = defineProps<Props>();
 
-// Define emits
 const emit = defineEmits<{
   (e: 'click', id: number): void;
 }>();
 
-// Handle click event
 const onClick = () => {
   emit('click', props.transaction.id);
 };
 
-// Format date to MMM DD format (e.g., Oct 19)
 const formattedDate = computed(() => {
   const date = new Date(props.transaction.date);
   return new Intl.DateTimeFormat('en-US', {
@@ -46,7 +42,6 @@ const formattedDate = computed(() => {
   }).format(date);
 });
 
-// Format amount with currency symbol
 const formattedAmount = computed(() => {
   const value = parseFloat(props.transaction.amount);
   return new Intl.NumberFormat('en-US', {
@@ -56,23 +51,18 @@ const formattedAmount = computed(() => {
   }).format(Math.abs(value));
 });
 
-// Determine transaction border color based on type
 const borderColorClass = computed(() => {
-  // Sent transactions
   if (props.transaction.state === 'sent') {
     return 'border-red-500';
   }
 
-  // Paid transactions
   if (props.transaction.state === 'paid') {
     return 'border-green-500';
   }
 
-  // Received transactions
-  return 'border-yellow-500'; // For 'received' state
+  return 'border-yellow-500';
 });
 
-// Determine amount color based on value
 const amountColorClass = computed(() => {
   return parseFloat(props.transaction.amount) < 0 ? 'text-red-600' : 'text-green-600';
 });

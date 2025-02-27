@@ -9,3 +9,14 @@ export interface ErrorResponse {
   code: string;
   details?: Record<string, any>;
 }
+
+export interface Transaction {
+  id: number;
+  date: string;
+  amount: string;
+  beneficiary: string;
+  description: string;
+  state: 'pending' | 'completed' | 'failed' | 'cancelled';
+  from_account_id: number;
+  to_account_id: number;
+}

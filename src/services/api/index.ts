@@ -8,7 +8,7 @@ import { setupInterceptors } from './interceptors';
  */
 export const createApiClient = (config?: AxiosRequestConfig): AxiosInstance => {
   const apiClient = axios.create({
-    baseURL: import.meta.env.VITE_API_BASE_URL || 'https://api.example.com',
+    baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000',
     timeout: 15000,
     headers: {
       'Content-Type': 'application/json',
@@ -17,13 +17,11 @@ export const createApiClient = (config?: AxiosRequestConfig): AxiosInstance => {
     ...config,
   });
 
-  // Set up request and response interceptors
   setupInterceptors(apiClient);
 
   return apiClient;
 };
 
-// Create and export a default API client instance
 export const apiClient = createApiClient();
 
 export default apiClient;

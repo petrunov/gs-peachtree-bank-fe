@@ -5,7 +5,3 @@
     </div>
   </header>
 </template>
-
-<script setup lang="ts">
-// AppHeader component
-</script>

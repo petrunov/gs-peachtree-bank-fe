@@ -11,7 +11,6 @@ export default {
   },
   plugins: [
     // Import Flowbite plugin
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
     (await import('flowbite/plugin')).default,
   ],
 };

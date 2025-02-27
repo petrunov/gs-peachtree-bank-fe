@@ -2,7 +2,7 @@
   <div class="container mx-auto px-4 py-8">
     <h1 class="text-3xl font-bold text-center mb-8">Home Page</h1>
 
-    <div class="bg-white dark:bg-gray-800 shadow-md rounded-lg p-6 mb-6">
+    <div class="bg-white shadow-md rounded-lg p-6 mb-6">
       <h2 class="text-xl font-semibold mb-4">Welcome to our Application</h2>
       <p class="mb-4">
         This is a Vue.js application with TypeScript, ESLint, Prettier, and pre-commit hooks.

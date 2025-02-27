@@ -2,7 +2,7 @@
   <div class="container mx-auto px-4 py-8">
     <h1 class="text-3xl font-bold text-center mb-8">Detail Page</h1>
 
-    <div class="bg-white dark:bg-gray-800 shadow-md rounded-lg p-6 mb-6">
+    <div class="bg-white shadow-md rounded-lg p-6 mb-6">
       <h2 class="text-xl font-semibold mb-4">Detail Information</h2>
       <p class="mb-4">
         This is the detail page of our application. In a real application, this page might display
@@ -80,3 +80,29 @@
     </div>
   </div>
 </template>
+
+<script>
+export default {
+  data() {
+    return {
+      error: null,
+      loading: false,
+      data: null,
+    };
+  },
+  created() {
+    // Simulate fetching data
+    this.loading = true;
+    setTimeout(() => {
+      this.loading = false;
+      // Uncomment the next line to simulate an error
+      // this.error = 'Failed to fetch data';
+      this.data = {
+        name: 'John Doe',
+        age: 30,
+        email: 'john.doe@example.com',
+      };
+    }, 2000);
+  },
+};
+</script>

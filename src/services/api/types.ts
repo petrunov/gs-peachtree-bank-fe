@@ -27,6 +27,8 @@ export interface Account {
   account_name: string;
   account_number: string;
   type: 'account';
+  balance?: string;
+  currency?: string;
 }
 
 export interface SearchResponse {

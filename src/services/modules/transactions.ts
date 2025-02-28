@@ -63,7 +63,6 @@ export const updateTransactionState = async (id: number, state: 'sent' | 'receiv
  */
 export const createTransaction = async (data: {
   amount: string;
-  beneficiary: string;
   description: string;
   from_account_id: number;
   to_account_id: number;

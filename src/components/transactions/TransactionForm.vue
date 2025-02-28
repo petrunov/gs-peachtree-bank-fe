@@ -69,6 +69,24 @@
         </select>
       </div>
 
+      <!-- Description -->
+      <div>
+        <label for="description" class="block text-sm font-medium text-gray-700 mb-1">
+          TRANSACTION TYPE
+        </label>
+        <select
+          id="description"
+          v-model="newTransaction.description"
+          class="block w-full rounded-md border-gray-300 shadow-sm focus:border-[#0C8397] focus:ring-[#0C8397] sm:text-sm"
+          required
+        >
+          <option value="" disabled>Select transaction type</option>
+          <option value="Card Payments">Card Payments</option>
+          <option value="Transaction">Transaction</option>
+          <option value="Online transfer">Online transfer</option>
+        </select>
+      </div>
+
       <!-- Amount -->
       <div>
         <label for="amount" class="block text-sm font-medium text-gray-700 mb-1"> AMOUNT </label>
@@ -89,36 +107,6 @@
           />
         </div>
         <p v-if="amountError" class="mt-1 text-sm text-red-600">{{ amountError }}</p>
-      </div>
-
-      <!-- Beneficiary -->
-      <div>
-        <label for="beneficiary" class="block text-sm font-medium text-gray-700 mb-1">
-          BENEFICIARY
-        </label>
-        <input
-          type="text"
-          id="beneficiary"
-          v-model="newTransaction.beneficiary"
-          class="block w-full rounded-md border-gray-300 shadow-sm focus:border-[#0C8397] focus:ring-[#0C8397] sm:text-sm"
-          placeholder="Enter beneficiary name"
-          required
-        />
-      </div>
-
-      <!-- Description -->
-      <div>
-        <label for="description" class="block text-sm font-medium text-gray-700 mb-1">
-          DESCRIPTION
-        </label>
-        <textarea
-          id="description"
-          v-model="newTransaction.description"
-          rows="2"
-          class="block w-full rounded-md border-gray-300 shadow-sm focus:border-[#0C8397] focus:ring-[#0C8397] sm:text-sm"
-          placeholder="Enter transaction description"
-          required
-        ></textarea>
       </div>
 
       <!-- Submit Button -->
@@ -164,7 +152,6 @@ const newTransaction = ref({
   fromAccount: '',
   toAccount: '',
   amount: '',
-  beneficiary: '',
   description: '',
 });
 const amountError = ref<string | null>(null);
@@ -226,7 +213,6 @@ const submitNewTransaction = async () => {
     !newTransaction.value.fromAccount ||
     !newTransaction.value.toAccount ||
     !newTransaction.value.amount ||
-    !newTransaction.value.beneficiary ||
     !newTransaction.value.description
   ) {
     submitError.value = 'Please fill in all fields';
@@ -247,17 +233,21 @@ const submitNewTransaction = async () => {
       formattedAmount += '0';
     }
 
+    // Get the from account to use as beneficiary
+    const fromAccount = accounts.value.find(
+      account => account.id.toString() === newTransaction.value.fromAccount,
+    );
+
     const toAccount = accounts.value.find(
       account => account.id.toString() === newTransaction.value.toAccount,
     );
 
-    if (!toAccount) {
+    if (!fromAccount || !toAccount) {
       throw new Error('Selected account not found');
     }
 
     await createTransaction({
       amount: formattedAmount,
-      beneficiary: newTransaction.value.beneficiary,
       description: newTransaction.value.description,
       from_account_id: parseInt(newTransaction.value.fromAccount),
       to_account_id: parseInt(newTransaction.value.toAccount),
@@ -269,7 +259,6 @@ const submitNewTransaction = async () => {
       fromAccount: '',
       toAccount: '',
       amount: '',
-      beneficiary: '',
       description: '',
     };
 

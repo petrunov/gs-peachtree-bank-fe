@@ -9,7 +9,6 @@
 
       <!-- Content when data is loaded -->
       <div v-if="!loading && !error">
-        <!-- Search and Sort Controls -->
         <search-and-sort-controls
           :is-searching="isSearching"
           :sort-column="sortColumn"
@@ -36,7 +35,11 @@
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue';
 import { useRouter } from 'vue-router';
-import { getTransactions, searchAccountsAndTransactions } from '../services/modules/transactions';
+import {
+  getTransactions,
+  getTransactionById,
+  searchAccountsAndTransactions,
+} from '../services/modules/transactions';
 import type { Transaction } from '../services/api/types';
 
 import TransactionHeader from '../components/transactions/TransactionHeader.vue';
@@ -79,11 +82,26 @@ const handleSearch = (query: string) => {
   isSearching.value = true;
   searchAccountsAndTransactions(query)
     .then(response => {
-      transactions.value = response.data.transactions;
+      // Get the transaction details directly from the API for each transaction
+      const fetchPromises = response.data.transactions.map(transaction =>
+        getTransactionById(transaction.id)
+          .then((detailResponse: { data: Transaction }) => detailResponse.data)
+          .catch((err: Error) => {
+            console.error(`Failed to fetch details for transaction ${transaction.id}:`, err);
+            return transaction; // Return original transaction if fetch fails
+          }),
+      );
 
-      if (transactions.value.length === 0 && response.data.accounts.length === 0) {
-        console.log('No results found for query:', query);
-      }
+      // Wait for all transaction details to be fetched
+      Promise.all(fetchPromises)
+        .then((detailedTransactions: Transaction[]) => {
+          transactions.value = detailedTransactions;
+        })
+        .catch((err: Error) => {
+          console.error('Error fetching transaction details:', err);
+          // Fallback to original transactions if detailed fetch fails
+          transactions.value = response.data.transactions;
+        });
     })
     .catch(err => {
       console.error('Search failed:', err);

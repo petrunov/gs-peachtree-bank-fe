@@ -53,7 +53,7 @@ A modern, responsive banking application frontend built with Vue 3, TypeScript, 
    yarn dev
    ```
 
-3. Open your browser and navigate to `http://localhost:5173` (or the URL shown in your terminal).
+3. Open your browser and navigate to `http://localhost:3000` (or the URL shown in your terminal).
 
 4. For production build:
    ```bash

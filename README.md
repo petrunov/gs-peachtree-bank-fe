@@ -64,13 +64,12 @@ A modern, responsive banking application frontend built with Vue 3, TypeScript, 
 
 ## Features
 
-- **Account Management**: View account details, balances, and transaction history
 - **Transaction Handling**:
   - View recent transactions with filtering and sorting
   - Create new transactions between accounts
   - Categorize transactions by type (Card Payments, Transaction, Online transfer)
 - **Search Functionality**: Search across accounts and transactions
-- **Responsive Design**: Works seamlessly on desktop and mobile devices
+- **Responsive Design**: Works seamlessly on different desktop resolutions
 - **Real-time Updates**: Transaction list updates automatically when new transactions are added
 - **Robust Error Handling**: Clear error messages and graceful error recovery
 - **Security Features**: Input sanitization and CSRF protection

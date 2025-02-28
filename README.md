@@ -1,6 +1,6 @@
 # Peachtree Bank Frontend
 
-A modern, responsive banking application frontend built with Vue 3, TypeScript, and Tailwind CSS. This application provides a clean and intuitive interface for managing bank accounts and transactions.
+A modern, responsive banking application frontend built with Vue 3, TypeScript, and Tailwind CSS. This application provides a clean and intuitive interface for managing transaction logs.
 
 ## Table of Contents
 

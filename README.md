@@ -72,6 +72,8 @@ A modern, responsive banking application frontend built with Vue 3, TypeScript, 
 - **Search Functionality**: Search across accounts and transactions
 - **Responsive Design**: Works seamlessly on desktop and mobile devices
 - **Real-time Updates**: Transaction list updates automatically when new transactions are added
+- **Robust Error Handling**: Clear error messages and graceful error recovery
+- **Security Features**: Input sanitization and CSRF protection
 
 ## Architecture
 
@@ -104,8 +106,9 @@ This approach keeps the application simple and maintainable without introducing 
 The frontend communicates with the backend through a dedicated API service layer:
 
 - **API Client**: Centralized Axios instance with interceptors for error handling
-- **Service Modules**: Organized by domain (accounts, transactions)
+- **Service Classes**: Organized by domain (AccountService, TransactionService)
 - **Type Definitions**: Strong TypeScript typing for API requests and responses
+- **Error Handling**: Consistent error processing and user-friendly messages
 
 ## Technologies Used
 
@@ -125,11 +128,17 @@ src/
 │   ├── layout/        # Layout components
 │   └── transactions/  # Transaction-related components
 ├── services/          # API services
-│   ├── api/           # API client and types
-│   └── modules/       # Domain-specific API modules
+│   ├── api/           # API client and interceptors
+│   ├── AccountService.ts  # Account service class
+│   └── TransactionService.ts  # Transaction service class
+├── utils/             # Utility functions
+│   └── security.ts    # Security utilities (sanitization, CSRF)
 ├── views/             # Page components
+│   ├── HomeView.vue   # Main transactions view
+│   ├── DetailView.vue # Transaction details view
+│   └── NotFoundView.vue # 404 error page
 ├── App.vue            # Root component
-└── main.ts            # Application entry point
+└── main.ts            # Application entry point with routing
 ```
 
 ## Future Improvements

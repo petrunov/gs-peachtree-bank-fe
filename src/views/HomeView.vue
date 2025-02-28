@@ -35,12 +35,8 @@
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue';
 import { useRouter } from 'vue-router';
-import {
-  getTransactions,
-  getTransactionById,
-  searchAccountsAndTransactions,
-} from '../services/modules/transactions';
 import type { Transaction } from '../services/api/types';
+import { transactionService } from '../services/TransactionService';
 
 import TransactionHeader from '../components/transactions/TransactionHeader.vue';
 import LoadingState from '../components/transactions/LoadingState.vue';
@@ -80,11 +76,13 @@ const handleSearch = (query: string) => {
   }
 
   isSearching.value = true;
-  searchAccountsAndTransactions(query)
+  transactionService
+    .searchAccountsAndTransactions(query)
     .then(response => {
       // Get the transaction details directly from the API for each transaction
-      const fetchPromises = response.data.transactions.map(transaction =>
-        getTransactionById(transaction.id)
+      const fetchPromises = response.data.transactions.map((transaction: any) =>
+        transactionService
+          .getTransactionById(transaction.id)
           .then((detailResponse: { data: Transaction }) => detailResponse.data)
           .catch((err: Error) => {
             console.error(`Failed to fetch details for transaction ${transaction.id}:`, err);
@@ -150,7 +148,7 @@ const handleSort = (column: 'date' | 'beneficiary' | 'amount') => {
 
 const loadAllTransactions = async () => {
   try {
-    const response = await getTransactions();
+    const response = await transactionService.getTransactions();
     transactions.value = response.data;
   } catch (err: any) {
     console.error('Failed to fetch transactions:', err);
@@ -177,7 +175,7 @@ watch(
 
 onMounted(async () => {
   try {
-    const response = await getTransactions();
+    const response = await transactionService.getTransactions();
     transactions.value = response.data;
   } catch (err: any) {
     console.error('Failed to fetch transactions:', err);

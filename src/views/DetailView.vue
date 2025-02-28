@@ -96,8 +96,8 @@
 <script setup lang="ts">
 import { ref, onMounted, computed, watch } from 'vue';
 import { useRoute } from 'vue-router';
-import { getTransactionById, updateTransactionState } from '../services/modules/transactions';
 import type { Transaction } from '../services/api/types';
+import { transactionService } from '../services/TransactionService';
 import ErrorState from '../components/transactions/ErrorState.vue';
 
 // Get route to access query parameters
@@ -139,7 +139,7 @@ const fetchTransactionData = async () => {
   }
 
   try {
-    const response = await getTransactionById(transactionId.value);
+    const response = await transactionService.getTransactionById(transactionId.value);
     transaction.value = response.data;
   } catch (err: any) {
     console.error('Failed to fetch transaction:', err);
@@ -185,7 +185,10 @@ const updateState = async () => {
   isUpdating.value = true;
 
   try {
-    const response = await updateTransactionState(transactionId.value, selectedState.value);
+    const response = await transactionService.updateTransactionState(
+      transactionId.value,
+      selectedState.value,
+    );
     transaction.value = response.data;
     updateSuccess.value = true;
 

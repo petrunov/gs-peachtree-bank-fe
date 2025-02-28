@@ -1,5 +1,6 @@
 import { AxiosInstance, AxiosError, InternalAxiosRequestConfig, AxiosResponse } from 'axios';
 import type { ErrorResponse } from './types';
+import { addCsrfToken } from '../../utils/security';
 
 // Enhanced error type that includes API error details
 export interface EnhancedAxiosError extends AxiosError {
@@ -10,10 +11,25 @@ export const setupInterceptors = (apiClient: AxiosInstance): void => {
   // Request interceptor
   apiClient.interceptors.request.use(
     (config: InternalAxiosRequestConfig) => {
+      // Add authentication token if available
       const token = localStorage.getItem('auth_token');
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
       }
+
+      // Add CSRF token to headers for non-GET requests
+      if (
+        config.method &&
+        ['post', 'put', 'patch', 'delete'].includes(config.method.toLowerCase())
+      ) {
+        const csrfToken = document
+          .querySelector('meta[name="csrf-token"]')
+          ?.getAttribute('content');
+        if (csrfToken) {
+          config.headers.set('X-CSRF-Token', csrfToken);
+        }
+      }
+
       return config;
     },
     (error: AxiosError) => {

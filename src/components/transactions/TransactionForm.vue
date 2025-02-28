@@ -136,9 +136,10 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
-import { getAccounts } from '../../services/modules/accounts';
-import { createTransaction } from '../../services/modules/transactions';
 import type { Account } from '../../services/api/types';
+import { accountService } from '../../services/AccountService';
+import { transactionService } from '../../services/TransactionService';
+import { sanitizeInput } from '../../utils/security';
 
 const emit = defineEmits<{
   (e: 'transactionAdded'): void;
@@ -164,7 +165,7 @@ const fetchAccounts = async () => {
   accountsError.value = null;
 
   try {
-    const response = await getAccounts({
+    const response = await accountService.getAccounts({
       limit: 100,
       offset: 0,
       sort_by: 'account_number',
@@ -246,9 +247,9 @@ const submitNewTransaction = async () => {
       throw new Error('Selected account not found');
     }
 
-    await createTransaction({
+    await transactionService.createTransaction({
       amount: formattedAmount,
-      description: newTransaction.value.description,
+      description: sanitizeInput(newTransaction.value.description),
       from_account_id: parseInt(newTransaction.value.fromAccount),
       to_account_id: parseInt(newTransaction.value.toAccount),
     });

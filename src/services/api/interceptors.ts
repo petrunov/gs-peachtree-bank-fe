@@ -1,4 +1,10 @@
 import { AxiosInstance, AxiosError, InternalAxiosRequestConfig, AxiosResponse } from 'axios';
+import type { ErrorResponse } from './types';
+
+// Enhanced error type that includes API error details
+export interface EnhancedAxiosError extends AxiosError {
+  apiError?: ErrorResponse;
+}
 
 export const setupInterceptors = (apiClient: AxiosInstance): void => {
   // Request interceptor
@@ -21,25 +27,32 @@ export const setupInterceptors = (apiClient: AxiosInstance): void => {
       return response;
     },
     (error: AxiosError) => {
-      if (error.response) {
-        const status = error.response.status;
+      // Create enhanced error object
+      const enhancedError = error as EnhancedAxiosError;
 
-        if (status === 401) {
-          console.error('Unauthorized access');
-        } else if (status === 403) {
-          console.error('Forbidden access');
-        } else if (status === 404) {
-          console.error('Resource not found');
-        } else if (status >= 500) {
-          console.error('Server error');
-        }
+      if (error.response?.data) {
+        // Extract API error details
+        enhancedError.apiError = error.response.data as ErrorResponse;
+
+        // Log with more details
+        console.error(
+          `API Error (${error.response.status}): ${enhancedError.apiError.code} - ${enhancedError.apiError.message}`,
+        );
       } else if (error.request) {
-        console.error('No response received from server');
+        enhancedError.apiError = {
+          code: 'NetworkError',
+          message: 'No response received from server. Please check your connection.',
+        };
+        console.error('Network Error: No response received');
       } else {
-        console.error('Error setting up request:', error.message);
+        enhancedError.apiError = {
+          code: 'RequestError',
+          message: error.message || 'An unknown error occurred',
+        };
+        console.error('Request Error:', error.message);
       }
 
-      return Promise.reject(error);
+      return Promise.reject(enhancedError);
     },
   );
 };

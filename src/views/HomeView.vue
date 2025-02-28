@@ -103,9 +103,15 @@ const handleSearch = (query: string) => {
           transactions.value = response.data.transactions;
         });
     })
-    .catch(err => {
+    .catch((err: any) => {
       console.error('Search failed:', err);
-      error.value = 'Failed to search. Please try again.';
+
+      // Use specific error message from API if available
+      if (err.apiError?.message) {
+        error.value = err.apiError.message;
+      } else {
+        error.value = 'Failed to search. Please try again.';
+      }
     })
     .finally(() => {
       isSearching.value = false;
@@ -146,9 +152,15 @@ const loadAllTransactions = async () => {
   try {
     const response = await getTransactions();
     transactions.value = response.data;
-  } catch (err) {
+  } catch (err: any) {
     console.error('Failed to fetch transactions:', err);
-    error.value = 'Failed to load transactions. Please try again later.';
+
+    // Use specific error message from API if available
+    if (err.apiError?.message) {
+      error.value = err.apiError.message;
+    } else {
+      error.value = 'Failed to load transactions. Please try again later.';
+    }
   }
 };
 
@@ -167,9 +179,15 @@ onMounted(async () => {
   try {
     const response = await getTransactions();
     transactions.value = response.data;
-  } catch (err) {
+  } catch (err: any) {
     console.error('Failed to fetch transactions:', err);
-    error.value = 'Failed to load transactions. Please try again later.';
+
+    // Use specific error message from API if available
+    if (err.apiError?.message) {
+      error.value = err.apiError.message;
+    } else {
+      error.value = 'Failed to load transactions. Please try again later.';
+    }
   } finally {
     loading.value = false;
   }

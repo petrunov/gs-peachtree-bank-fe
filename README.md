@@ -23,7 +23,7 @@ A modern, responsive banking application frontend built with Vue 3, TypeScript, 
 
 - Node.js (v16 or higher)
 - npm or yarn
-- Peachtree Bank Backend API running (see [Backend Repository](https://github.com/yourusername/gs-peachtree-bank))
+- Peachtree Bank Backend API running (see [Backend Repository](https://github.com/petrunov/gs-peachtree-bank))
 
 ### Installation
 

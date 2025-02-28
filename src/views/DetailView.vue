@@ -1,7 +1,7 @@
 <template>
   <div class="h-full flex flex-col">
     <h1 class="text-xl font-bold text-white p-4 bg-[#0C8397] w-full">
-      Details for transaction {{ transactionId }}
+      {{ transactionId ? `Details for transaction ${transactionId}` : 'Transaction Details' }}
     </h1>
 
     <div class="p-6">
@@ -118,7 +118,6 @@ const transactionId = computed(() => {
 
   // Validate that transaction_id is a string and can be parsed as a number
   if (typeof id !== 'string' || isNaN(parseInt(id))) {
-    error.value = 'Invalid transaction ID';
     return null;
   }
 
@@ -134,6 +133,7 @@ const fetchTransactionData = async () => {
 
   // Validate transaction ID
   if (!transactionId.value) {
+    error.value = 'Invalid or missing transaction ID. Please check the URL and try again.';
     loading.value = false;
     return;
   }
@@ -141,9 +141,15 @@ const fetchTransactionData = async () => {
   try {
     const response = await getTransactionById(transactionId.value);
     transaction.value = response.data;
-  } catch (err) {
+  } catch (err: any) {
     console.error('Failed to fetch transaction:', err);
-    error.value = 'Failed to load transaction details. Please try again later.';
+
+    // Use specific error message from API if available
+    if (err.apiError?.message) {
+      error.value = err.apiError.message;
+    } else {
+      error.value = 'Failed to load transaction details. Please try again later.';
+    }
   } finally {
     loading.value = false;
   }
@@ -187,9 +193,15 @@ const updateState = async () => {
     setTimeout(() => {
       updateSuccess.value = false;
     }, 3000);
-  } catch (err) {
+  } catch (err: any) {
     console.error('Failed to update transaction state:', err);
-    updateError.value = 'Failed to update transaction state. Please try again.';
+
+    // Use specific error message from API if available
+    if (err.apiError?.message) {
+      updateError.value = err.apiError.message;
+    } else {
+      updateError.value = 'Failed to update transaction state. Please try again.';
+    }
   } finally {
     isUpdating.value = false;
   }
